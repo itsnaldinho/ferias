@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/pt-br.js'></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* VARIÁVEIS DE CORES MODERNAS */
+    :root {
+      --bg-color: #f0f4f8;
+      --card-bg: #ffffff;
+      --primary: #4361ee;
+      --primary-hover: #3f37c9;
+      --text-dark: #2b2d42;
+      --text-muted: #8d99ae;
+      --border-radius: 12px;
+      --shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+
+    body { 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      padding: 20px; 
+      background: var(--bg-color); 
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    h2 { 
+      text-align: center; 
+      font-weight: 800; 
+      color: var(--primary); 
+      margin-bottom: 30px;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    /* LAYOUT RESPONSIVO */
+    .container { 
+      display: flex; 
+      gap: 20px; 
+      max-width: 1400px;
+      margin: 0 auto;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .form-container, .calendar-container { 
+      background: var(--card-bg); 
+      padding: 25px; 
+      border-radius: var(--border-radius); 
+      box-shadow: var(--shadow); 
+    }
+
+    .form-container { 
+      flex: 1; 
+      min-width: 280px; 
+      height: fit-content; 
+    }
+
+    .calendar-container { 
+      flex: 3; 
+      min-width: 0; /* Permite que o calendário encolha em telas pequenas */
+    }
+
+    /* ESTILOS DE FORMULÁRIO */
+    label { 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      display: block; 
+      margin-top: 15px; 
+    }
+
+    input { 
+      width: 100%; 
+      padding: 12px; 
+      margin-top: 8px; 
+      box-sizing: border-box; 
+      border: 2px solid #e2e8f0; 
+      border-radius: 8px; 
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    button { 
+      margin-top: 25px; 
+      width: 100%; 
+      padding: 14px; 
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover)); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    button:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* LEGENDA ANIMADA E INTERATIVA */
+    .legend { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .legend-item { 
+      display: flex; 
+      align-items: center; 
+      font-size: 0.95rem; 
+      font-weight: 500;
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer; /* Indica que é clicável */
+    }
+    .legend-item:hover { background: #f8f9fa; }
+    
+    /* Estilo para o item da legenda "selecionado" (ativo) */
+    .legend-item.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .color-box { width: 20px; height: 8px; border-radius: 4px; margin-right: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    /* Ajuste para que a cor da caixa da legenda não mude quando o item estiver ativo (mantém a identidade visual) */
+    .legend-item.active .color-box {
+        box-shadow: 0 2px 4px rgba(255,255,255,0.3);
+    }
+
+    /* CUSTOMIZAÇÃO DO CALENDÁRIO (As linhas de cores e o "Hoje") */
+    .fc-event {
+      height: 8px !important; /* Linha mais grossa */
+      margin-top: 2px !important;
+      margin-bottom: 2px !important;
+      border-radius: 4px !important;
+      border: none !important;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .fc-event:hover {
+      transform: scaleY(1.5); /* Animação ao passar o mouse */
+    }
+    .fc-event-title-container, .fc-event-main {
+      display: none !important; /* Esconde o texto para ficar só a linha */
+    }
+
+    /* Destaque vibrante para o dia de HOJE */
+    .fc-day-today {
+      background-color: rgba(67, 97, 238, 0.05) !important;
+      box-shadow: inset 0 0 0 3px var(--primary) !important;
+    }
+
+    /* ANIMAÇÕES */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* MEDIA QUERY PARA CELULAR (Responsividade) */
+    @media (max-width: 850px) {
+      .container { flex-direction: column; padding: 0; gap: 15px; }
+      body { padding: 10px; }
+      .calendar-container { overflow-x: auto; padding: 15px; }
+      .fc-toolbar { flex-direction: column; gap: 10px; }
+      /* No celular, a legenda fica na horizontal e os botões menores */
+      .legend { flex-direction: row; flex-wrap: wrap; gap: 5px;}
+      .legend-item { padding: 8px 12px; font-size: 0.85rem;}
+      h2 { font-size: 1.5rem; margin-bottom: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🏖️ Controle de Férias da Equipe</h2>
+  
+  <div class="container">
+    <div class="form-container">
+      <h3 style="margin-top:0; color: var(--text-dark);">Novo Agendamento</h3>
+      
+      <label>Nome do Colaborador:</label>
+      <input type="text" id="name" placeholder="Ex: Reginaldo" autocomplete="off">
+      
+      <label>Data de Início:</label>
+      <input type="date" id="startDate">
+      
+      <label>Duração (Dias):</label>
+      <input type="number" id="days" placeholder="Ex: 15" min="1">
+      
+      <button onclick="submitForm()" id="btnSubmit">Agendar Férias</button>
+      
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0 20px 0;">
+      <h4 style="margin:0; color: var(--text-dark);">Indicadores Visuais (Clique para filtrar)</h4>
+      <div class="legend" id="legendContainer"></div>
+    </div>
+
+    <div class="calendar-container">
+      <div id='calendar'></div>
+    </div>
+  </div>
+
+  <script>
+    let calendar;
+    // Variável global para armazenar os dados brutos de férias e os nomes únicos
+    let rawVacationData = [];
+    let activeFilterUser = null; // Armazena o nome da pessoa atualmente filtrada
+    // Mapa de cores para cada nome de colaborador
+    let userColorMap = {};
+
+    const holidays = [
+      '2025-12-25', '2026-01-01', '2026-02-17', '2026-04-03', '2026-04-05',
+      '2026-04-21', '2026-05-01', '2026-06-04', '2026-07-03', '2026-09-07',
+      '2026-10-12', '2026-11-02', '2026-11-15', '2026-11-20', '2026-12-25'
+    ];
+
+    // Lista de cores predefinidas muito distintas e vibrantes
+    const DISTINCT_COLORS = [
+      '#FF6B6B', // Coral
+      '#FFD93D', // Amarelo vibrante
+      '#6BCB77', // Verde menta
+      '#4D96FF', // Azul céu
+      '#9B59B6', // Roxo ametista
+      '#F39C12', // Laranja vibrante
+      '#1ABC9C', // Turquesa
+      '#D35400', // Abóbora
+      '#2C3E50', // Azul petróleo
+      '#C0392B'  // Vermelho escuro
+    ];
+
+    // Função melhorada para atribuir cores distintas predefinidas
+    function getColorForName(name) {
+        if (userColorMap[name]) {
+            return userColorMap[name];
+        } else {
+            // Atribui uma nova cor da lista, usando o índice do próximo item
+            const colorIndex = Object.keys(userColorMap).length % DISTINCT_COLORS.length;
+            userColorMap[name] = DISTINCT_COLORS[colorIndex];
+            return userColorMap[name];
+        }
+    }
+
+    // Função auxiliar para gerar um Set de nomes únicos a partir dos dados brutos
+    function generateUniqueNamesSet(unfilteredData) {
+        let namesSet = new Set();
+        unfilteredData.forEach(item => {
+            if (item.name) namesSet.add(item.name);
+        });
+        return namesSet;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'multiMonthYear', 
+        locale: 'pt-br',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,multiMonthYear' 
+        },
+        buttonText: {
+          today: 'Ir para Hoje',
+          month: 'Mês',
+          multiMonthYear: 'Ano'
+        },
+        // Configurações vitais para remover o "+1" e mostrar todas as linhas
+        dayMaxEvents: false, 
+        multiMonthMaxEvents: false,
+        
+        // Adiciona um Tooltip nativo (aparece o nome ao colocar o mouse/clicar na linha)
+        eventDidMount: function(info) {
+          if (info.event.title !== 'Feriado') {
+            info.el.setAttribute('title', info.event.title); // Mostra o nome da pessoa
+          }
+        },
+        events: []
+      });
+      
+      calendar.render();
+      loadEvents();
+    });
+
+    function loadEvents() {
+      google.script.run.withSuccessHandler(data => {
+          rawVacationData = data; // Armazena os dados brutos para filtragem futura
+          applyFilterAndRender(); // Chama a função de renderização que também lida com filtros
+      }).getVacationData();
+    }
+
+    // Função que orquestra a renderização da legenda e do calendário com base no filtro ativo
+    function applyFilterAndRender() {
+        // 1. Gera e constrói a legenda COMPLETA (sempre a lista de todos os colaboradores únicos)
+        const fullNamesSet = generateUniqueNamesSet(rawVacationData);
+        buildLegendFromSet(fullNamesSet); // Esta função já cuida de destacar o item ativo
+
+        // 2. Filtra os dados brutos com base no filtro ativo
+        let filteredData;
+        if (activeFilterUser) {
+            filteredData = rawVacationData.filter(item => item.name === activeFilterUser);
+        } else {
+            filteredData = rawVacationData; // Mostra tudo se nenhum filtro estiver ativo
+        }
+
+        // 3. Renderiza o calendário com os dados filtrados
+        renderCalendarData(filteredData);
+    }
+
+    // Função de filtragem chamada ao clicar na legenda
+    function filterByUser(userName) {
+        if (activeFilterUser === userName) {
+            activeFilterUser = null; // Clicou no mesmo nome, limpa o filtro
+        } else {
+            activeFilterUser = userName; // Define o novo filtro
+        }
+        applyFilterAndRender(); // Recarrega tudo com o novo estado de filtro
+    }
+
+    // Função que gera a legenda interativa, destacando o item ativo
+    function buildLegendFromSet(namesSet) {
+        const legendDiv = document.getElementById('legendContainer');
+        legendDiv.innerHTML = '';
+        
+        namesSet.forEach(name => {
+            const color = getColorForName(name);
+            const isActive = (activeFilterUser === name) ? ' active' : ''; // Adiciona classe 'active' se for o filtro atual
+            
+            // Cria um item de legenda clicável
+            legendDiv.innerHTML += `
+                <div class="legend-item${isActive}" id="legend-item-${name}" onclick="filterByUser('${name.replace(/'/g, "\\'")}')">
+                    <div class="color-box" style="background:${color}"></div>
+                    ${name}
+                </div>
+            `;
+        });
+
+        // Adiciona o item de feriados, que serve para limpar o filtro
+        legendDiv.innerHTML += `
+            <div class="legend-item" id="legend-item-feriados" style="margin-top:10px; border-top:1px dashed #ccc; padding-top:15px;" onclick="filterByUser(null)">
+                <div class="color-box" style="background:#ffcccc; height:15px; border-radius:2px;"></div>
+                Feriados Nacionais (Limpar Filtro)
+            </div>
+        `;
+    }
+
+    // Função que apenas desenha os eventos passados a ela no calendário
+    function renderCalendarData(data) {
+      calendar.removeAllEvents();
+      
+      // 1. Férias (As linhas grossas)
+      data.forEach(item => {
+        if(!item.name || !item.startDate) return;
+        
+        let start = new Date(item.startDate + 'T00:00:00'); 
+        let end = new Date(start);
+        end.setDate(end.getDate() + parseInt(item.days)); 
+        
+        calendar.addEvent({
+          title: item.name + ' (' + item.days + ' dias)',
+          start: start,
+          end: end, 
+          allDay: true,
+          backgroundColor: getColorForName(item.name),
+        });
+      });
+
+// 2. Feriados (Fundo preto sólido e letras brancas)
+      holidays.forEach(hDate => {
+        calendar.addEvent({
+          title: 'Feriado',
+          start: hDate,
+          allDay: true,
+          display: 'block', // Cria uma barra sólida em vez de colorir o fundo
+          backgroundColor: '#000000', // Fundo Preto
+          textColor: '#ffffff', // Letras Brancas
+          borderColor: '#000000' // Remove qualquer borda padrão
+        });
+      });
+    }
+
+    function submitForm() {
+      const name = document.getElementById('name').value;
+      const startDate = document.getElementById('startDate').value;
+      const days = document.getElementById('days').value;
+      const btn = document.getElementById('btnSubmit');
+
+      // Alerta moderno de validação
+      if (!name || !startDate || !days) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Atenção!',
+          text: 'Por favor, preencha o Nome, Data e a Quantidade de Dias.',
+          confirmButtonColor: '#4361ee'
+        });
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Agendando...";
+
+      google.script.run
+        .withSuccessHandler(() => {
+          // Alerta moderno de Sucesso
+          Swal.fire({
+            icon: 'success',
+            title: 'Agendado!',
+            text: `As férias de ${name} foram marcadas com sucesso.`,
+            showConfirmButton: false,
+            timer: 2500
+          });
+          
+          document.getElementById('name').value = '';
+          document.getElementById('startDate').value = '';
+          document.getElementById('days').value = '';
+          btn.disabled = false;
+          btn.innerText = "Agendar Férias";
+          
+          // Recarrega todos os dados, o que limpará filtros e reconstruirá a legenda com o novo nome
+          loadEvents();
+        })
+        .withFailureHandler((error) => {
+          // Alerta moderno de Erro
+          Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: "Ocorreu um erro ao salvar: " + error.message,
+            confirmButtonColor: '#4361ee'
+          });
+          btn.disabled = false;
+          btn.innerText = "Agendar Férias";
+        })
+        .addVacation(name, startDate, days);
+    }
+  </script>
+</body>
+</html>
