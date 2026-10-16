@@ -79,7 +79,7 @@ function checkAndSendVacationReminders() {
 
 function sendVacationEmail(name, startDate, days) {
   // E-mails dos destinatários
-  var recipients = "gustavo.alexsander@voxconexao.com.br, gladyson.souza@voxconexao.com.br";
+  var recipients = "gerente@dominio.com.br, supervisor@dominio.com.br";
   
   // Formata a data para padrão brasileiro
   var formattedDate = Utilities.formatDate(startDate, Session.getScriptTimeZone(), "dd/MM/yyyy");
